@@ -31,6 +31,7 @@
                     <Item subMenuId="edit-eolConversion" name="Conversão final de linha" />
                     <Item subMenuId="edit-blankOperations" name="Operações com espaços" />
                     <Item subMenuId="edit-pasteSpecial" name="Colar especial" />
+                    <Item subMenuId="edit-onSelection" name="Na Seleção"/>
                     <Item subMenuId="search-markAll" name="Marcar todos" />
                     <Item subMenuId="search-unmarkAll" name="Desmarcar todos" />
                     <Item subMenuId="search-jumpUp" name="Saltar acima" />
@@ -86,7 +87,7 @@
                     <Item id="41016" name="Apagar do disco" />
                     <Item id="41017" name="Renomear..." />
                     <Item id="41021" name="Restaurar último arquivo fechado"/>
-                    
+                    <Item id="41022" name="Abrir pasta como A. de trabalho" />
                     <Item id="42001" name="Recor&amp;tar" />
                     <Item id="42002" name="&amp;Copiar" />
                     <Item id="42003" name="&amp;Desfazer" />
@@ -112,6 +113,16 @@
                     <Item id="42066" name="Organizar linhas como números decimais (ponto) em ordem decrescente"/>
                     <Item id="42016" name="MAIÚSCULO" />
                     <Item id="42017" name="minúsculo" />
+                    <Item id="42067" name="Iniciais Maiúsculas"/>
+                    <Item id="42068" name="Iniciais Maiúsculas (misturado)"/>
+                    <Item id="42069" name="Inicial maiúscula"/>
+                    <Item id="42070" name="Inicial maiúscula (misturado)"/>
+                    <Item id="42071" name="iNVERTER cASO"/>
+                    <Item id="42072" name="CasO aleATório"/>
+                    <Item id="42073" name="Abrir Arquivo"/>
+                    <Item id="42074" name="Abrir Conteúdo Pasta no Explorer"/>
+                    <Item id="42075" name="Pesquisar na Internet"/>
+                    <Item id="42076" name="Alterar Motor de Pesquisa..."/>
                     <Item id="42018" name="Iniciar gravação" />
                     <Item id="42019" name="Parar gravação" />
                     <Item id="42021" name="&amp;Reproduzir" />
@@ -216,6 +227,7 @@
                     <Item id="44049" name="Informações sobre o arquivo..." />
                     <Item id="44080" name="Mapa do documento"/>
                     <Item id="44084" name="Lista de funções"/>
+                    <Item id="44085" name="Pasta como A. de trabalho" />
                     <Item id="44086" name="Aba 1"/>
                     <Item id="44087" name="Aba 2"/>
                     <Item id="44088" name="Aba 3"/>
@@ -227,6 +239,9 @@
                     <Item id="44094" name="Aba 9"/>
                     <Item id="44095" name="Aba seguinte"/>
                     <Item id="44096" name="Aba anterior"/>
+                    <Item id="44097" name="Monitorando (tail -f)"/>
+                    <Item id="44098" name="Mover para Próxima Aba"/>
+                    <Item id="44099" name="Mover para Aba Anterior"/>
                     <Item id="44032" name="Modo Tela Inteira" />
                     <Item id="44033" name="Retornar ao zoom padrão" />
                     <Item id="44034" name="Manter sobre as outras janelas" />
@@ -279,6 +294,7 @@
                     <Item id="47003" name="NpWiki++ (Ajuda Online)" />
 					<Item id="47004" name="Fórum" />
                     <Item id="47011" name="Suporte online"/>
+                    <Item id="47012" name="Informações de Depuração..."/>
                     <Item id="47005" name="Obter mais plugins" />
                     <Item id="47006" name="Atualizar o Notepad++" />
                     <Item id="47009" name="Configurar Atualizador Proxy..."/>
@@ -500,6 +516,7 @@
                     <Item id="21224" name="Abrir:" />
                     <Item id="21225" name="Meio:" />
                     <Item id="21226" name="Fechar:" />
+                <Item id="21127" name="Estilo" />
                     <Item id="21227" name="Estilo" />
                     <Item id="21320" name="Dobragem de código estilo 2 (separadores necessários):" />
                     <Item id="21324" name="Abrir:" />
@@ -623,6 +640,7 @@
                     <Item id="24672" name="Fechar:" />
                     <Item id="24673" name="Estilo" />
                 </Operator>
+                <Item id="24001" name="Habilitar carácter escape :" />
             </UserDefine>
             <Preference title="Preferências">
                 <Item id="6001" name="Fechar" />
@@ -680,6 +698,8 @@
                     <Item id="6214" name="Realçar linha atual" />
 					<Item id="6215" name="Habilitar fonte suave"/>
                     <Item id="6231" name="Largura da borda" />
+                    <Item id="6235" name="Sem borda" /><br/>
+            <Item id="6236" name="Habilitar a rolagem além da última linha"/>
                 </Scintillas>
                 <NewDoc title="Novo Documento">
                     <Item id="6401" name="Formato" />
@@ -701,23 +721,34 @@
                     <Item id="6413" name="Diretório padrão (Abrir/Salvar)" />
                     <Item id="6414" name="De acordo com documento atual" />
                     <Item id="6415" name="Lembrar último diretório" />
+                    <Item id="6430" name="Usar novo estilo de diálogo salvar (recurso sem extensão de arquivo)"/>
+                    <Item id="6431" name="Abrir todos os arquivos da pasta em vez da Pasta como Espaço de Trabalho ao arrastar pasta"/>                 
                 </DefaultDir>
                 <FileAssoc title="Tipos de Arquivos">
                     <Item id="4009" name="Extensões suportadas :" />
                     <Item id="4010" name="Extensões registradas :" />
                 </FileAssoc>
-                <LangMenu title="Menu de Linguagem">
+                <Language title="Linguagem">
                     <Item id="6505" name="Itens disponíveis" />
                     <Item id="6506" name="Itens desabilitados" />
-                    <Item id="6507" name="Tornar o menu de linguagens compacto" />
-                    <Item id="6508" name="Menu de linguagens" />
-                </LangMenu>
-                <TabSettings title="Configurações do TAB">
-                    <Item id="6301" name="Configurações do TAB" />
+                    <Item id="6507" name="Tornar o menu de linguagem compacto" />
+                    <Item id="6508" name="Menu de Linguagem" />
+                    <Item id="6301" name="Configurar Tabulação" />
                     <Item id="6302" name="Substituir por espaços" />
-                    <Item id="6303" name="Tamanho do TAB: " />
+                    <Item id="6303" name="Tamanho: " />
                     <Item id="6510" name="Usar valor padrão" />
-                </TabSettings>
+                </Language>
+                 <Highlighting title="Destaque">
+                    <Item id="6333" name="Destaque Inteligente" />
+                    <Item id="6326" name="Habilitar destaque inteligente"/>
+                    <Item id="6332" name="Destacar maiúscula e minúscula" />
+                    <Item id="6338" name="Somente palavras inteiras"/>
+                    <Item id="6339" name="Usar configurações do diálogo Localizar"/>
+                    <Item id="6329" name="Destacador de Tags" />
+                    <Item id="6327" name="Habilitar" />
+                    <Item id="6328" name="Destacar tags de atributos" />
+                    <Item id="6330" name="Destacar áreas comentadas/php/asp" />
+                </Highlighting>
                 <Print title="Impressão">
                     <Item id="6601" name="Imprimir número da linha" />
                     <Item id="6602" name="Opções de cores" />
@@ -869,19 +900,54 @@
             </ColumnEditor>
         </Dialog>
         <MessageBox>
-            <ContextMenuXmlEditWarning title="Editando contextMenu" message="Editar o arquivo contextMenu.xml permite que você modifique as mensagens do menu de contexto.\rÉ necessário reiniciar o Notepad++ para que as modificações tenham efeito." />
-            <NppHelpAbsentWarning title="Arquivo não existe" message="\rnão existe. Por favor baixe o arquivo no site do Notepad++." />
-            <SaveCurrentModifWarning title="Salvar modificações atuais" message="Você deve salvar a modificação atual.\rAs modificações salvas não poderão ser desfeitas.\r\rDeseja continuar?" />
-            <LoseUndoAbilityWarning title="Impossível desfazer" message="Você deve salvar a modificação atual.\rAs modificações salvas não poderão ser desfeitas.\r\rDeseja continuar?" />
-            <CannotMoveDoc title="Mover para nova instância do Notepad++" message="Documento alterado, salve-o e tente novamente." />
-            <DocReloadWarning title="Recarregar" message="Você tem certeza que quer recarregar o arquivo atual e perder as modificações feitas no Notepad++?" />
+            <ContextMenuXmlEditWarning title="Editando contextMenu" message="Editar o arquivo contextMenu.xml permite que você modifique as mensagens do menu de contexto.&#x0A;É necessário reiniciar o Notepad++ para que as modificações tenham efeito."/>
+            <ColumnModeTip title="Seleção no modo coluna" message="Use 'Alt+Seleção do Mouse' ou 'Alt+Shift+Setas' para ativar o modo coluna."/>
+            <NppHelpAbsentWarning title="Arquivo não existe" message="&#x0A;não existe. Por favor baixe o arquivo no site do Notepad++."/>
+            <SaveCurrentModifWarning title="Salvar modificações atuais" message="Você deve salvar a modificação atual.&#x0A;As modificações salvas não poderão ser desfeitas.&#x0A;&#x0A;Deseja continuar?"/>
+            <LoseUndoAbilityWarning title="Impossível desfazer" message="Você deve salvar a modificação atual.&#x0A;As modificações salvas não poderão ser desfeitas.&#x0A;&#x0A;Deseja continuar?"/>
+            <CannotMoveDoc title="Mover para nova instância do Notepad++" message="Documento alterado, salve-o e tente novamente."/>
+            <DocReloadWarning title="Recarregar" message="Você tem certeza que quer recarregar o arquivo atual e perder as modificações feitas no Notepad++?"/>
+            <BufferInvalidWarning title="Falha ao salvar" message="Não é possível salvar: Buffer é inválido."/>
+            <OpenInAdminMode title="Falha ao salvar" message="O arquivo não pode ser salvo e pode ser protegido.&#x0A;Quer executar o Notepad++ no modo administrador?"/>
+            <OpenInAdminModeFailed title="Falha ao abrir no modo administrador" message="Notepad++ não pode ser aberto no modo administrador."/>
+            <OpenInAdminMode title="Falha ao abrir no modo administrador" message="Notepad++ não pode ser aberto no modo administrador."/>
+            <OpenInAdminModeWithoutCloseCurrent title="Falha ao salvar" message="O arquivo não pode ser salvo e pode ser protegido.&#x0A;Quer executar o Notepad++ no modo administrador?"/>
             <FileLockedWarning title="Falha ao salvar" message="Por favor verifique se este arquivo está aberto em outro programa" />
             <FileAlreadyOpenedInNpp title="" message="O arquivo já está aberto no Notepad++." />
             <DeleteFileFailed title="Excluir Arquivo" message="Falha ao excluir arquivo" />
+            
+            <!-- $INT_REPLACE$ is a place holder, don't translate it -->
+            <NbFileToOpenImportantWarning title="Quantidade de arquivos para abrir é muito grande" message="$INT_REPLACE$ arquivos estão prestes a serem abertos.&#x0A;Tem certeza que abri-los?"/>
+            <SettingsOnCloudError title="Configurações da Nuvem" message="Parece que o caminho das configurações da nuvem foi definida em uma unidade de somente leitura,&#x0A;ou em uma pasta que nescessita de privilégio para acessar e escrever.&#x0A;Suas configurações da nuvem serão canceladas. Por favor, redefina um valor coerente através do diálogo de preferências."/>
+            <FilePathNotFoundWarning title="Abrir Arquivo" message="O arquivo que você está tentando abrir não existe."/>
         </MessageBox>
+        <ClipboardHistory>
+            <PanelTitle name="His. da Á. de Transferência" />
+        </ClipboardHistory>
+        <DocSwitcher>
+            <PanelTitle name="Trocar de Documento" />
+            <ColumnName name="Nome" />
+            <ColumnExt name="Ext."/>
+        </DocSwitcher>
+        <AsciiInsertion>
+            <PanelTitle name="Painel de Inserção ASCII" />
+            <ColumnVal name="Valor" />
+            <ColumnHex name="Hex" />
+            <ColumnChar name="Caracteres" />
+        </AsciiInsertion>
+         <DocumentMap>
+            <PanelTitle name="Mapa do Documento" />
+        </DocumentMap>
+         <FunctionList>
+            <PanelTitle name="Lista de Função" />
+            <SortTip name="Organizar" />
+            <ReloadTip name="Recarregar" />
+        </FunctionList>
         <ProjectManager>
             <PanelTitle name="Projeto" />
             <WorkspaceRootName name="Área de trabalho" />
+            <NewProjectName name="Nome do Projeto" />
+            <NewFolderName name="Nome da Pasta" />
             <Menus>
                 <Entries>
                     <Item id="0" name="Área de trabalho" />
@@ -900,18 +966,26 @@
                     <Item id="3111" name="Renomear" />
                     <Item id="3112" name="Adicionar pastas" />
                     <Item id="3113" name="Adicionar arquivos..." />
+                    <Item id="3117" name="Adicionar Arquivos do Diretório..."/>
                     <Item id="3114" name="Remover" />
+                    <Item id="3118" name="Mover Acima" />
+                    <Item id="3119" name="Mover Abaixo" />
                 </ProjectMenu>
                 <FolderMenu>
                     <Item id="3111" name="Renomear" />
                     <Item id="3112" name="Adicionar pastas" />
                     <Item id="3113" name="Adicionar arquivos..." />
+                    <Item id="3117" name="Adicionar Arquivos do Diretório..."/>
                     <Item id="3114" name="Remover" />
+                    <Item id="3118" name="Mover Acima" />
+                    <Item id="3119" name="Mover Abaixo" />
                 </FolderMenu>
                 <FileMenu>
                     <Item id="3111" name="Renomear" />
                     <Item id="3115" name="Remover" />
                     <Item id="3116" name="Alterar caminho do arquivo" />
+                    <Item id="3118" name="Mover Acima" />
+                    <Item id="3119" name="Mover Abaixo" />
                 </FileMenu>
             </Menus>
         </ProjectManager>
