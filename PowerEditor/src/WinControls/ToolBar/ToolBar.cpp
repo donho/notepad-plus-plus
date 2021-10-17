@@ -306,7 +306,7 @@ void ToolBar::reset(bool create)
 			{
 				setDefaultImageListDM();
 				setDisableImageListDM();
-				//if (w11)
+				if (NppDarkMode::isWindows11())
 				{
 					setHoveredImageListDM();
 				}
@@ -323,7 +323,7 @@ void ToolBar::reset(bool create)
 			{
 				setDefaultImageListDM2();
 				setDisableImageListDM2();
-				//if (w11)
+				if (NppDarkMode::isWindows11())
 				{
 					setHoveredImageListDM2();
 				}
