@@ -485,6 +485,6 @@ If ErrorLevel 1 goto End
 
 endlocal
 
-REM PACKACKAGES BUILT SUCCESSFUL!
+powershell -command "Write-Host 'PACKAGES BUILT SUCCESSFUL!' -ForegroundColor Green"
 
 :End
