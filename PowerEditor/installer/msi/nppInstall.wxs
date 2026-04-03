@@ -85,29 +85,18 @@
 					<RegistryValue Name="ThreadingModel" Type="string" Value="Apartment" />
 				</RegistryKey>
 			</Component>
+			
+			<!--
+			Register sparse MSIX package after user next login for Windows 11 modern context menu
+			-->
+			<Component Id="cmp_RegSparsePackage" Guid="{02E790D5-3018-48E5-9B04-2C75925767AD}">
+				<RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce">
+				<RegistryValue Name="RegisterNppShell"
+							   Value="&quot;[System64Folder]WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command &quot;$p = '[ContextMenuFolder]'.TrimEnd('\'); Add-AppxPackage -Path \&quot;$p\NppShell.msix\&quot; -ExternalLocation \&quot;$p\&quot;&quot;"
+							   Type="string" />
+				</RegistryKey>
+			</Component>
 		</ComponentGroup>
-	
-
-		<!--
-		Register sparse MSIX package immediately during install for Windows 11 modern context menu
-		-->
-		<SetProperty Id="QtExecCmd"
-					 Value="powershell.exe -NonInteractive -WindowStyle Hidden -Command &quot;$path = '[ContextMenuFolder]'.TrimEnd('\'); Add-AppxPackage -Path '$path\NppShell.msix' -ExternalLocation '$path'&quot;"
-					 Before="RegisterSparsePackage"
-					 Sequence="execute" />
-
-		<CustomAction Id="RegisterSparsePackage"
-					  BinaryRef="Wix4UtilCA_X86"
-					  DllEntry="WixQuietExec"
-					  Execute="deferred"
-					  Impersonate="yes"
-					  Return="ignore" />
-
-		<InstallExecuteSequence>
-			<Custom Action="RegisterSparsePackage" After="InstallFiles" Condition="NOT Installed" />
-		</InstallExecuteSequence>
-
-
 
 		<Feature Id="MainApplication" Title="Notepad++ Files" Level="1">
 			<ComponentGroupRef Id="CoreComponentGroup" />
