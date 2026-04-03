@@ -1,10 +1,16 @@
 <Project Sdk="WixToolset.Sdk/6.0.2">
-  <PropertyGroup>
-    <OutputName>npp.Installer.x64</OutputName>
-    <OutputType>Package</OutputType>
-	<Platform>x64</Platform>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputName>npp.Installer.x64</OutputName>
+		<OutputType>Package</OutputType>
+		<Platform>x64</Platform>
+		<SuppressValidation>true</SuppressValidation>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<DebugType>none</DebugType>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WixToolset.Util.wixext" Version="*" />
+	</ItemGroup>
 </Project>
