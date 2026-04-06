@@ -590,6 +590,11 @@ void DockingManager::createDockableDlg(DockedWidgetData data, int iCont, bool is
 		// set default rect state
 		::GetWindowRect(data.hClient, &data.rcFloat);
 
+		// changing the width & hieigth in data.rcFloat triggers a WM_SIZE message or a layout recalculation internally,
+		// forcing the window to repaint/refresh itself afterward.
+		data.rcFloat.right += 1;
+		data.rcFloat.bottom += 1;
+
 		// test if dialog is first time created
 		if (iCont == -1)
 		{
