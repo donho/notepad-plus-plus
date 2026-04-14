@@ -3597,6 +3597,127 @@ bool Notepad_plus::isConditionExprLine(intptr_t lineNumber)
 	return false;
 }
 
+bool isPositionInCommentOrQuotes(ScintillaEditView* pEditView, intptr_t rangeStart, intptr_t rangeEnd, intptr_t position)
+{
+	//if (!pEditView || rangeStart > rangeEnd || pos < rangeStart || pos > rangeEnd)
+	//	return false;
+
+	bool isMultiLineComment = false;
+	bool inQuotes = false;
+
+	for (intptr_t i = rangeStart; i < rangeEnd; ++i)
+	{
+		char ch = static_cast<char>(pEditView->execute(SCI_GETCHARAT, i));
+
+		if (!isMultiLineComment)
+		{
+			if (ch == '"' && (char)pEditView->execute(SCI_GETCHARAT, i - 1) != '\\')  // Check if it's inside double quotes
+				inQuotes = !inQuotes;  // Toggle the double quote flag
+		}
+
+		if (!inQuotes)
+		{
+			// "//" and "/*"
+			if (!isMultiLineComment && ch == '/')
+			{
+				char next = static_cast<char>(pEditView->execute(SCI_GETCHARAT, i + 1));
+				if (next == '/')
+				{
+					if (i + 1 < position)  // position is after a single-line comment
+						return true;
+				}
+				else if (next == '*')
+				{
+					isMultiLineComment = true;
+					++i;
+					continue;
+				}
+			}
+
+			// "*/"
+			if (isMultiLineComment && ch == '*')
+			{
+				char next = static_cast<char>(pEditView->execute(SCI_GETCHARAT, i + 1));
+				if (next == '/')
+				{
+					isMultiLineComment = false;
+					++i;
+					continue;
+				}
+			}
+
+			// Inside a multi-line comment
+			if (isMultiLineComment && i == position)
+			{
+				return true;
+			}
+		}
+		else if (i == position)  // Input of '{' or '}' inside double quotes
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Check if there's a left curly brace '{' in the specified range
+bool isLeftCurlyBraceInRange(ScintillaEditView* pEditView, intptr_t rangeStart, intptr_t rangeEnd)
+{
+	int count = 0;
+	bool isMultiLineComment = false;
+	bool inQuotes = false;
+	for (intptr_t pos = rangeEnd; pos >= rangeStart; --pos)
+	{
+		char currentChar = (char)pEditView->execute(SCI_GETCHARAT, pos);
+
+		if (!isMultiLineComment)
+		{
+			if (currentChar == '"' && (char)pEditView->execute(SCI_GETCHARAT, pos - 1) != '\\')  // Check if it's inside double quotes
+				inQuotes = !inQuotes;  // Toggle the double quote flag
+
+			if (inQuotes)  // Skip characters inside double quotes
+				continue;
+		}
+
+		if (!inQuotes)
+		{
+			if (isMultiLineComment)  // Skip characters if currently inside a multi-line comment
+			{
+				if (currentChar == '*' && (char)pEditView->execute(SCI_GETCHARAT, pos - 1) == '/')
+				{
+					isMultiLineComment = false;
+					pos--;  // Skip the start of multi-line comment characters '/'
+				}
+				continue;
+			}
+
+			if (currentChar == '/')  // It could be the end of a multi-line comment
+			{
+				char prevChr = (char)pEditView->execute(SCI_GETCHARAT, pos - 1);
+				if (prevChr == '/')
+				{
+					pos--;  // Skip a single-line comment
+					count = 0;  // Reset to 0 after processing all previous comments
+					continue;
+				}
+				else if (prevChr == '*')
+				{
+					isMultiLineComment = true;
+					continue;
+				}
+			}
+		}
+
+		if (currentChar == '{')
+			++count;
+		else if (currentChar == '}')
+			--count;
+	}
+
+	return (count == 1);  // If there's only one '{' on the left side within the range, return true
+}
+
 intptr_t Notepad_plus::findMachedBracePos(size_t startPos, size_t endPos, char targetSymbol, char matchedSymbol)
 {
 	if (startPos == endPos)
@@ -3604,10 +3725,53 @@ intptr_t Notepad_plus::findMachedBracePos(size_t startPos, size_t endPos, char t
 
 	if (startPos > endPos) // backward
 	{
+		bool isMultiLineComment = false;
+		bool inQuotes = false;
+
 		int balance = 0;
 		for (intptr_t i = startPos; i >= static_cast<intptr_t>(endPos); --i)
 		{
 			char aChar = static_cast<char>(_pEditView->execute(SCI_GETCHARAT, i));
+
+			if (!isMultiLineComment)
+			{
+				if (aChar == '"' && static_cast<char>(_pEditView->execute(SCI_GETCHARAT, i - 1)) != '\\')
+					inQuotes = !inQuotes;
+
+				if (inQuotes)
+					continue;
+			}
+
+			/* added */
+			if (!inQuotes)
+			{
+				if (isMultiLineComment)
+				{
+					if (aChar == '*' && (char)_pEditView->execute(SCI_GETCHARAT, i - 1) == '/')
+					{
+						isMultiLineComment = false;
+						i--;
+					}
+					continue;
+				}
+
+				if (aChar == '/')
+				{
+					char prevChr = (char)_pEditView->execute(SCI_GETCHARAT, i - 1);
+					if (prevChr == '/')
+					{
+						i--;
+						balance = 0;  // Reset to 0
+						continue;
+					}
+					else if (prevChr == '*')
+					{
+						isMultiLineComment = true;
+						continue;
+					}
+				}
+			}
+
 			if (aChar == targetSymbol)
 			{
 				if (balance == 0)
@@ -3638,12 +3802,13 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 	intptr_t indentAmountPrevLine = 0;
 	intptr_t tabWidth = _pEditView->execute(SCI_GETTABWIDTH);
 
+	const bool isEnter = ((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') || (eolMode == SC_EOL_CR && ch == '\r');  // added
 	// Do not alter indentation if we were at the beginning of the line and we pressed Enter
-	if ((((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') ||
-		(eolMode == SC_EOL_CR && ch == '\r')) && prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
+	if (isEnter && prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)  // modified
 		return;
 
-	LangType type = _pEditView->getCurrentBuffer()->getLangType();
+	Buffer* buf = _pEditView->getCurrentBuffer();  // added
+	LangType type = buf->getLangType();  // modified  //LangType type = _pEditView->getCurrentBuffer()->getLangType();
 	ExternalLexerAutoIndentMode autoIndentMode = ExternalLexerAutoIndentMode::Standard;
 
 	// For external languages, query for custom auto-indentation funcionality
@@ -3657,8 +3822,7 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 
 	if (nppGui._maintainIndent == autoIndent_basic) // Basic indentation mode only
 	{
-		if (((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') ||
-			(eolMode == SC_EOL_CR && ch == '\r'))
+		if (isEnter)  // modified
 		{
 			// Search the non-empty previous line
 			while (prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
@@ -3680,13 +3844,9 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 
 	// else nppGui._maintainIndent == autoIndent_advance
 
-	if (type == L_C || type == L_CPP || type == L_JAVA || type == L_CS || type == L_OBJC ||
-		type == L_PHP || type == L_JS_EMBEDDED || type == L_JAVASCRIPT || type == L_JSP || type == L_CSS || type == L_PERL || 
-		type == L_RUST || type == L_POWERSHELL || type == L_JSON || type == L_JSON5 || type == L_TYPESCRIPT || type == L_GOLANG || type == L_SWIFT || 
-		autoIndentMode == ExternalLexerAutoIndentMode::C_Like)
+	if (buf->isCLike() >= 1 || autoIndentMode == ExternalLexerAutoIndentMode::C_Like)  // modified
 	{
-		if (((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') ||
-			(eolMode == SC_EOL_CR && ch == '\r'))
+		if (isEnter)  // modified
 		{
 			// Search the non-empty previous line
 			while (prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
@@ -3708,7 +3868,7 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 			{
 				if (nextChar == '}')
 				{
-					const char *eolChars;
+					const char* eolChars;
 					if (eolMode == SC_EOL_CRLF)
 						eolChars = "\r\n";
 					else if (eolMode == SC_EOL_LF)
@@ -3726,7 +3886,7 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 				_pEditView->setLineIndent(curLine, indentAmountPrevLine);
 			}
 			// These languages do no support single line control structures without braces.
-			else if (type == L_PERL || type == L_RUST || type == L_POWERSHELL || type == L_JSON || type == L_JSON5)
+			else if (buf->isCLike() == 1)  // modified
 			{
 				_pEditView->setLineIndent(curLine, indentAmountPrevLine);
 			}
@@ -3750,6 +3910,9 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 			// if no character in front of {, aligned with prev line's indentation
 			auto startPos = _pEditView->execute(SCI_POSITIONFROMLINE, curLine);
 			LRESULT endPos = _pEditView->execute(SCI_GETCURRENTPOS);
+
+			if (isPositionInCommentOrQuotes(_pEditView, startPos, _pEditView->execute(SCI_GETLINEENDPOSITION, curLine), endPos - 1))  // added
+				return;  // added
 
 			for (LRESULT i = endPos - 2; i > 0 && i >= startPos; --i)
 			{
@@ -3790,6 +3953,13 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 		{
 			// Look backward for the pair {
 			intptr_t startPos = _pEditView->execute(SCI_GETCURRENTPOS);
+
+			if (isPositionInCommentOrQuotes(_pEditView, _pEditView->execute(SCI_POSITIONFROMLINE, curLine), _pEditView->execute(SCI_GETLINEENDPOSITION, curLine), startPos - 1))  // added
+				return;  // added
+
+			if (static_cast<char>(_pEditView->execute(SCI_GETCHARAT, startPos - 2)) == '\'')  // added
+				return;  // added
+
 			if (startPos != 0)
 				startPos -= 1;
 			intptr_t posFound = findMachedBracePos(startPos - 1, 0, '{', '}');
@@ -3815,11 +3985,59 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 				_pEditView->setLineIndent(i, indentAmountPrevLine + tabWidth);
 			*/
 		}
+		else if (ch == ';')  // added
+		{
+			intptr_t currPos = _pEditView->execute(SCI_GETCURRENTPOS);
+			intptr_t lineStart = _pEditView->execute(SCI_POSITIONFROMLINE, curLine);
+			intptr_t lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, curLine);
+			char leftCh = static_cast<char>(_pEditView->execute(SCI_GETCHARAT, currPos - 2));  // A character on the left of ';'
+			if (isPositionInCommentOrQuotes(_pEditView, lineStart, lineEnd, currPos - 1) || leftCh == '/' || leftCh == '\\' || leftCh == '\'' || leftCh == '\r' || leftCh == '\n')
+				return;
+
+			_pEditView->execute(SCI_BEGINUNDOACTION);
+
+			// First, remove the extra spaces and TABs to the left of the ';'
+			intptr_t removeStart = -1, removeEnd = -1;
+			for (intptr_t i = currPos - 2; i >= lineStart; --i)
+			{
+				char aChar = static_cast<char>(_pEditView->execute(SCI_GETCHARAT, i));
+				bool isBlank = (aChar == ' ' || aChar == '\t');
+				if (isBlank && removeEnd == -1)
+				{
+					removeEnd = i + 1;
+				}
+				else if (!isBlank && removeEnd != -1)
+				{
+					removeStart = i + 1;
+					break;
+				}
+			}
+			if (removeStart != -1 && removeEnd != -1)
+			{
+				_pEditView->execute(SCI_SETTARGETRANGE, removeStart, removeEnd);
+				_pEditView->execute(SCI_REPLACETARGET, 0, reinterpret_cast<LPARAM>(""));
+			}
+
+			// Insert indentation
+			while (prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
+				prevLine--;
+
+			if (prevLine >= 0)
+			{
+				indentAmountPrevLine = _pEditView->getLineIndent(prevLine);
+				if (isLeftCurlyBraceInRange(_pEditView, _pEditView->execute(SCI_POSITIONFROMLINE, prevLine), _pEditView->execute(SCI_GETLINEENDPOSITION, prevLine)))  // If there is a '{' character in the previous line, the current line needs to be indented
+					indentAmountPrevLine += tabWidth;
+				else if (!isLeftCurlyBraceInRange(_pEditView, lineStart, lineEnd))  // If there is no '{' character in the previous line and no '{' character in the current line, then the current line needs to be indented
+					indentAmountPrevLine += tabWidth;
+				_pEditView->setLineIndent(curLine, indentAmountPrevLine);
+			}
+
+			_pEditView->execute(SCI_ENDUNDOACTION);
+		}
 	}
 	else if (type == L_PYTHON)
 	{
-		if (((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') ||
-			(eolMode == SC_EOL_CR && ch == '\r'))
+		if (isEnter)  // modified
 		{
 			// Search the non-empty previous line
 			while (prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
@@ -3855,8 +4073,7 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 	}
 	else // Basic indentation mode
 	{
-		if (((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') ||
-			(eolMode == SC_EOL_CR && ch == '\r'))
+		if (isEnter)  // modified
 		{
 			// Search the non-empty previous line
 			while (prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
@@ -3874,6 +4091,7 @@ void Notepad_plus::maintainIndentation(wchar_t ch)
 		}
 	}
 }
+
 
 BOOL Notepad_plus::processFindAccel(MSG *msg) const
 {

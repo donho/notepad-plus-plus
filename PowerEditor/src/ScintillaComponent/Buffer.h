@@ -394,6 +394,37 @@ public:
 	bool isPinned() const { return _isPinned; }
 	void setPinned(bool isPinned) { _isPinned = isPinned; }
 
+	int isCLike() {  // added
+		switch (_lang) {
+		case L_PERL:
+		case L_RUST:
+		case L_POWERSHELL:
+		case L_JSON:
+		case L_JSON5:
+			return 1;
+
+			//case L_TEXT:
+		case L_C:
+		case L_CPP:
+		case L_JAVA:
+		case L_CS:
+		case L_OBJC:
+		case L_PHP:
+		case L_JS_EMBEDDED:
+		case L_JAVASCRIPT:
+		case L_JSP:
+		case L_CSS:
+		case L_TYPESCRIPT:
+		case L_GOLANG:
+		case L_SWIFT:
+		case L_USER:  // added
+			return 2;
+
+		default:
+			return 0;
+		}
+	}
+
 private:
 	int indexOfReference(const ScintillaEditView * identifier) const;
 
